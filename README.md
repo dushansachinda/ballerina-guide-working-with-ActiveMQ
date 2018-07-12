@@ -16,3 +16,31 @@ Let's consider a real world secenario where online order management system. Clie
 - Testing
 - Deployment
 - Observability
+
+# Prerequisites
+
+- Ballerina Distribution
+- Apache ActiveMQ 5.12.0
+
+**Note -**
+After installing the JMS broker, copy its .jar files into the <BALLERINA_HOME>/bre/lib folder
+For ActiveMQ 5.12.0: Copy activemq-client-5.12.0.jar, geronimo-j2ee-management_1.1_spec-1.0.1.jar and hawtbuf-1.11.jar
+A Text Editor or an IDE
+
+
+# Implementation
+If you want to skip the basics, you can download the git repo and directly move to the "Testing" section by skipping "Implementation" section.
+
+# Create the project structure
+
+Ballerina is a complete programming language that supports custom project structures. Use the following package structure for this guide.
+
+
+     
+- Create the above directories in your local machine and also create empty .bal files.
+- Then open the terminal and navigate to ballerina-with-ActiveMQ/guide and run Ballerina project initializing toolkit.
+
+```
+  $ ballerina init
+```
+
