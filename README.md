@@ -35,10 +35,24 @@ If you want to skip the basics, you can download the git repo and directly move 
 
 Ballerina is a complete programming language that supports custom project structures. Use the following package structure for this guide.
 
+```
+ballerina-guide-working-with-ActiveMQ
+ └── guide
+      ├── order_accepting_service
+      │    ├── order_accepting_service.bal
+      │    └── tests
+      │         └── order_accepting_service_test.bal
+      │── order_dispatcher_service
+      │    └── order_dispatcher_service.bal
+      │
+      └── order_process_service
+	   ├── retail_order_process_service.bal
+	   └── wholesale_order_process_service.bal	
 
+```
      
 - Create the above directories in your local machine and also create empty .bal files.
-- Then open the terminal and navigate to ballerina-with-ActiveMQ/guide and run Ballerina project initializing toolkit.
+- Then open the terminal and navigate to ballerina-guide-working-with-ActiveMQ/guide and run Ballerina project initializing toolkit.
 
 ```
   $ ballerina init
