@@ -43,4 +43,7 @@ Ballerina is a complete programming language that supports custom project struct
 ```
   $ ballerina init
 ```
+# Developing the service
+
+Let's get start with the implementation of the order_accepting_service.bal, which acts as a http endpoint which accept request from client and publish messages to a JMS destination.
 
