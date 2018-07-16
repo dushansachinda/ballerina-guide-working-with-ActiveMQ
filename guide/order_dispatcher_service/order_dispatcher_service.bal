@@ -23,13 +23,13 @@ endpoint jms:QueueReceiver jmsConsumer {
     queueName:"Order_Queue"
 };
 
-// Initialize a queue sender using the created session
+// Initialize a retail queue sender using the created session
 endpoint jms:QueueSender jmsProducerRetail {
     session:jmsSession,
     queueName:"Retail_Queue"
 };
 
-// Initialize a queue sender using the created session
+// Initialize a wholesale queue sender using the created session
 endpoint jms:QueueSender jmsProducerWholesale {
     session:jmsSession,
     queueName:"Wholesale_Queue"
@@ -54,6 +54,7 @@ service<jms:Consumer> orderDispatcherService bind jmsConsumer {
         //Retrieving JSON attribute "OrderType" value
         json orderType = result.orderType;
 
+        //filtering and routing messages using message orderType
         if(orderType.toString() == "retail"){
               // Create a JMS message
                 jms:Message queueMessage = check jmsSession.createTextMessage(orderDetails);
@@ -66,11 +67,9 @@ service<jms:Consumer> orderDispatcherService bind jmsConsumer {
             // Send the message to the Wolesale JMS queue
              _ = jmsProducerWholesale -> send(queueMessage);
              log:printInfo("New Wholesale order added to the Wholesale JMS Queue");
-        }else{      
+        }else{    
+            //ignoring invalid orderTypes  
         log:printInfo("No any valid order type recieved, ignoring the message, order type recieved - " + orderType.toString());
-        }
-        
-
-        
+        }    
     }
 }
