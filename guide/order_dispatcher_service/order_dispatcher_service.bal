@@ -1,5 +1,8 @@
 import ballerina/log;
 import ballerina/jms;
+import ballerina/io;
+
+
 
 // Initialize a JMS connection with the provider
 // 'Apache ActiveMQ' has been used as the message broker
@@ -20,14 +23,54 @@ endpoint jms:QueueReceiver jmsConsumer {
     queueName:"Order_Queue"
 };
 
+// Initialize a queue sender using the created session
+endpoint jms:QueueSender jmsProducerRetail {
+    session:jmsSession,
+    queueName:"Retail_Queue"
+};
+
+// Initialize a queue sender using the created session
+endpoint jms:QueueSender jmsProducerWholesale {
+    session:jmsSession,
+    queueName:"Wholesale_Queue"
+};
+
+
 // JMS service that consumes messages from the JMS queue
 // Bind the created consumer to the listener service
 service<jms:Consumer> orderDispatcherService bind jmsConsumer {
     // Triggered whenever an order is added to the 'Order_Queue'
     onMessage(endpoint consumer, jms:Message message) {
+
         log:printInfo("New order received from the JMS Queue");
         // Retrieve the string payload using native function
-        string stringPayload = check message.getTextMessageContent();
-        log:printInfo("Order Details: " + stringPayload);
+        var orderDetails = check message.getTextMessageContent();
+        log:printInfo("validating  Details: " + orderDetails);
+
+        //Converting String content to JSON
+        io:StringReader reader = new io:StringReader(orderDetails);
+        json result = check reader.readJson();
+        var closeResult = reader.close();
+        //Retrieving JSON attribute "OrderType" value
+        json orderType = result.orderType;
+
+        if(orderType.toString() == "retail"){
+              // Create a JMS message
+                jms:Message queueMessage = check jmsSession.createTextMessage(orderDetails);
+            // Send the message to the Retail JMS queue
+             _ = jmsProducerRetail -> send(queueMessage);
+             log:printInfo("New Retail order added to the Retail JMS Queue");
+        }else if(orderType.toString() == "wholesale"){
+            // Create a JMS message
+                jms:Message queueMessage = check jmsSession.createTextMessage(orderDetails);
+            // Send the message to the Wolesale JMS queue
+             _ = jmsProducerWholesale -> send(queueMessage);
+             log:printInfo("New Wholesale order added to the Wholesale JMS Queue");
+        }else{      
+        log:printInfo("No any valid order type recieved, ignoring the message, order type recieved - " + orderType.toString());
+        }
+        
+
+        
     }
 }
