@@ -59,7 +59,7 @@ ballerina-guide-working-with-ActiveMQ
 ```
 # Developing the service
 
-Let's get start with the implementation of the order_accepting_service.bal, which acts as a http endpoint which accept request from client and publish messages to a JMS destination.
+Let's get start with the implementation of the "order_accepting_service.bal", which acts as a http endpoint which accept request from client and publish messages to a JMS destination. "order_dispatcher_service.bal" process the each message recieve to the Order_Queue and route orders to the destinations queues by considering their message content. "retail_order_process_service.bal" and "wholesale_order_process_service.bal" are listner services for the retail_Queue and Wholesale_Queue.
 
 **order_accepting_service.bal**
 ```
