@@ -327,5 +327,29 @@ service<jms:Consumer> orderDispatcherService bind jmsConsumer {
 ```
 # Testing
 
+innvoking the service
 
+First, start the Apache ActiveMQ server by entering the following command in a terminal from <ActiveMQ_BIN_DIRECTORY>.
+```
+   $ ./activemq start
+```
+Start in each direcrory is side the guide directory and run following commands in seperate terminals. 
+```
+   $ ballerina run order_accepting_service.bal
+   $ ballerina run order_dispatcher_service.bal
+   $ ballerina run retail_order_process_service.bal
+   $ ballerina run wholesale_order_process_service.bal
+```
+You can use below requests to simulate retail and wholesale order placing.
+```
+   curl -v POST -d \
+   '{"customerID":"C001", "productID":"P001", 
+   "quantity":"4","orderType":"retail"}' \
+   "http://localhost:9090/placeorder" -H "Content-Type:application/json" 
+
+  curl -v -X POST -d \
+   '{"customerID":"C002", "productID":"P002", 
+   "quantity":"40000","orderType":"wholesale"}' \
+   "http://localhost:9090/placeorder" -H "Content-Type:application/json" 
+```
 
