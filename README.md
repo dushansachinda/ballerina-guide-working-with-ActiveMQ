@@ -342,14 +342,10 @@ service<jms:Consumer> orderDispatcherService bind jmsConsumer {
 ```
 - You can use below requests to simulate retail and wholesale order placing.
 ```
-   curl -v POST -d \
-   '{"customerID":"C001", "productID":"P001", 
-   "quantity":"4","orderType":"retail"}' \
-   "http://localhost:9090/placeorder" -H "Content-Type:application/json" 
+   curl -d '{"customerID":"C001","productID":"P001","quantity":"4","orderType":"retail"}' -H "Content-Type: application/json" -X POST http://localhost:9090/orderAcceptingService/placeOrder
+ 
 
-  curl -v -X POST -d \
-   '{"customerID":"C002", "productID":"P002", 
-   "quantity":"40000","orderType":"wholesale"}' \
-   "http://localhost:9090/placeorder" -H "Content-Type:application/json" 
+  curl -d '{"customerID":"C002","productID":"P002","quantity":"40000","orderType":"wholesale"}' -H "Content-Type: application/json" -X POST http://localhost:9090/orderAcceptingService/placeOrder
+ 
 ```
 
