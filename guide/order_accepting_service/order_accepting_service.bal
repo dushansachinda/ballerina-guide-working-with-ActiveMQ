@@ -36,7 +36,7 @@ endpoint http:Listener listener {
 };
 
 // Order Accepting Service, which allows users to place order online
-@http:ServiceConfig {basePath:"/placeorder"}
+@http:ServiceConfig {basePath:"/placeOrder"}
 service<http:Service> orderAcceptingService bind listener {
     // Resource that allows users to place an order 
     @http:ResourceConfig { methods: ["POST"], consumes: ["application/json"],
