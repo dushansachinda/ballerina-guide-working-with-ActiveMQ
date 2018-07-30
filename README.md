@@ -348,4 +348,9 @@ service<jms:Consumer> orderDispatcherService bind jmsConsumer {
   curl -d '{"customerID":"C002","productID":"P002","quantity":"40000","orderType":"wholesale"}' -H "Content-Type: application/json" -X POST http://localhost:9090/orderAcceptingService/placeOrder
  
 ```
+# Deployment
+
+Once you are done with the development, you can deploy the services using any of the methods that we listed below.
+
+**Deploying locally**
 
