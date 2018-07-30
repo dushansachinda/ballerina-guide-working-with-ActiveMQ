@@ -354,3 +354,20 @@ Once you are done with the development, you can deploy the services using any of
 
 **Deploying locally**
 
+As the first step, you can build Ballerina executable archives (.balx) of the services that we developed above. Navigate to each directory in ballerina-guide-working-with-ActiveMQ/guide and run the following command.
+```
+   $ ballerina build
+```
+Once the .balx files are created inside the target folder, you can run them using the following command.
+``
+   $ ballerina run <Exec_Archive_File_Name>
+``
+The successful execution of a service will show us something similar to the following output.
+```
+ballerina: initiating service(s) in 'order_accepting_service.balx'
+ballerina: initiating service(s) in 'order_dispatcher_service.balx'
+ballerina: initiating service(s) in 'retail_order_process_service.balx'
+ballerina: initiating service(s) in 'wholesale_order_process_service.balx'
+```
+
+
