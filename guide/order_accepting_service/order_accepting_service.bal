@@ -1,6 +1,10 @@
 import ballerina/log;
 import ballerina/http;
 import ballerina/jms;
+import ballerinax/docker;   
+
+
+
 
 // Type definition for a order
 type Order record {
@@ -30,7 +34,20 @@ endpoint jms:QueueSender jmsProducer {
     queueName:"Order_Queue"
 };
 
-// Service endpoint
+
+@docker:Config {
+    registry:"ballerina.guides.io",
+    name:"order_accepting_service.bal",
+    tag:"v1.0"
+}
+
+@docker:CopyFiles {
+   files:[{source:"/home/krishan/Servers/apache-activemq-5.12.0/lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar",
+           target:"/ballerina/runtime/bre/lib"},{source:"/home/krishan/Servers/apache-activemq-5.12.0/lib/activemq-client-5.12.0.jar",
+          target:"/ballerina/runtime/bre/lib"}] }
+
+
+@docker:Expose{}
 endpoint http:Listener listener {
     port:9090
 };
@@ -41,7 +58,7 @@ service<http:Service> orderAcceptingService bind listener {
     // Resource that allows users to place an order 
     @http:ResourceConfig { methods: ["POST"], consumes: ["application/json"],
         produces: ["application/json"] }
-    placeOrder(endpoint caller, http:Request request) {
+    place(endpoint caller, http:Request request) {
         http:Response response;
         Order newOrder;
         json reqPayload;
