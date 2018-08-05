@@ -20,7 +20,7 @@ type Order record {
 // 'Apache ActiveMQ' has been used as the message broker in this example
 jms:Connection jmsConnection = new({
         initialContextFactory: "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-        providerUrl: "tcp://localhost:61616"
+        providerUrl: "tcp://172.17.0.2:61616"
     });
 
 // Initialize a JMS session on top of the created connection
