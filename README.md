@@ -349,6 +349,17 @@ curl -d '{"customerID":"C001","productID":"P001","quantity":"4","orderType":"ret
 curl -d '{"customerID":"C002","productID":"P002","quantity":"40000","orderType":"wholesale"}' -H "Content-Type: application/json" -X POST http://localhost:9090/placeOrder/place
  
 ```
+
+# Writing unit tests
+
+In Ballerina, the unit test cases should be in the same package inside a folder named as 'tests'. When writing the test functions the below convention should be followed.
+
+Test functions should be annotated with @test:Config. See the below example.
+```
+   @test:Config
+   function testResourcePickup() {
+```
+
 # Deployment
 
 Once you are done with the development, you can deploy the services using any of the methods that we listed below.
@@ -484,3 +495,106 @@ docker run -d  ballerina.guides.io/retail_order_process_service.bal:v1.0
 ```
 curl -d '{"customerID":"C001","productID":"P001","quantity":"4","orderType":"retail"}' -H "Content-Type: application/json" -X POST http://localhost:9090/placeOrder/place
 ```
+
+# Observability
+
+
+Ballerina is by default observable. Meaning you can easily observe your services, resources, etc. However, observability is disabled by default via configuration. Observability can be enabled by adding following configurations to ballerina.conf file in ballerina-guide-working-with-ActiveMQ/guide/.
+```
+[b7a.observability]
+
+[b7a.observability.metrics]
+# Flag to enable Metrics
+enabled=true
+
+[b7a.observability.tracing]
+# Flag to enable Tracing
+enabled=true
+```
+NOTE: The above configuration is the minimum configuration needed to enable tracing and metrics. With these configurations default values are load as the other configuration parameters of metrics and tracing.
+
+# Tracing
+- You can monitor ballerina services using in built tracing capabilities of Ballerina. We'll use Jaeger as the distributed tracing system. Follow the following steps to use tracing with Ballerina.
+
+- You can add the following configurations for tracing. Note that these configurations are optional if you already have the basic configuration in ballerina.conf as described above.
+```
+   [b7a.observability]
+
+   [b7a.observability.tracing]
+   enabled=true
+   name="jaeger"
+
+   [b7a.observability.tracing.jaeger]
+   reporter.hostname="localhost"
+   reporter.port=5775
+   sampler.param=1.0
+   sampler.type="const"
+   reporter.flush.interval.ms=2000
+   reporter.log.spans=true
+   reporter.max.buffer.spans=1000
+   ```
+- Run Jaeger docker image using the following command
+```
+   $ docker run -d -p5775:5775/udp -p6831:6831/udp -p6832:6832/udp -p5778:5778 \
+   -p16686:16686 p14268:14268 jaegertracing/all-in-one:latest
+```
+- Navigate to ballerina-guide-working-with-ActiveMQ/guide and run the order_accepting_service using following command
+```
+   $ ballerina run order_accepting_service/
+```
+- Observe the tracing using Jaeger UI using following URL
+```
+   http://localhost:16686
+```
+
+# Metrics
+
+
+Metrics and alerts are built-in with ballerina. We will use Prometheus as the monitoring tool. Follow the below steps to set up Prometheus and view metrics for trip-management service.
+
+- You can add the following configurations for metrics. Note that these configurations are optional if you already have the basic configuration in ballerina.conf as described under Observability section.
+```
+   [b7a.observability.metrics]
+   enabled=true
+   provider="micrometer"
+
+   [b7a.observability.metrics.micrometer]
+   registry.name="prometheus"
+
+   [b7a.observability.metrics.prometheus]
+   port=9700
+   hostname="0.0.0.0"
+   descriptions=false
+   step="PT1M"
+```
+
+- Create a file prometheus.yml inside /tmp/ location. Add the below configurations to the prometheus.yml file.
+```
+   global:
+     scrape_interval:     15s
+     evaluation_interval: 15s
+
+   scrape_configs:
+     - job_name: prometheus
+       static_configs:
+         - targets: ['172.17.0.1:9797']
+```
+NOTE : Replace 172.17.0.1 if your local docker IP differs from 172.17.0.1
+
+- Run the Prometheus docker image using the following command
+```
+   $ docker run -p 19090:9090 -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml \
+   prom/prometheus
+```
+- You can access Prometheus at the following URL
+```
+   http://localhost:19090/
+```
+NOTE: Ballerina will by default have following metrics for HTTP server connector. You can enter following expression in Prometheus UI
+
+- http_requests_total
+- http_response_time
+
+# Logging
+//Todo
+
