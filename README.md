@@ -550,7 +550,7 @@ NOTE: The above configuration is the minimum configuration needed to enable trac
 # Metrics
 
 
-Metrics and alerts are built-in with ballerina. We will use Prometheus as the monitoring tool. Follow the below steps to set up Prometheus and view metrics for trip-management service.
+Metrics and alerts are built-in with ballerina. We will use Prometheus as the monitoring tool. Follow the below steps to set up Prometheus and view metrics for order_accepting_service service.
 
 - You can add the following configurations for metrics. Note that these configurations are optional if you already have the basic configuration in ballerina.conf as described under Observability section.
 ```
