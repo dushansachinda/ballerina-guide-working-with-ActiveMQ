@@ -34,7 +34,7 @@ jms:Session jmsSession = new(conn, {
 // Initialize a retail queue receiver using the created session
 endpoint jms:QueueReceiver jmsConsumer {
     session:jmsSession,
-    queueName:"Wholesale_Queue"
+    queueName:"Retail_Queue"
 };
 
 // JMS service that consumes messages from the JMS queue
@@ -46,8 +46,7 @@ service<jms:Consumer> orderDispatcherService bind jmsConsumer {
         log:printInfo("New order received from the JMS Queue");
         // Retrieve the string payload using native function
         var orderDetails = check message.getTextMessageContent();
-        log:printInfo("below wholesale order has been successfully processed");
+        log:printInfo("below retail order has been successfully processed");
         log:printInfo(orderDetails);
-
     }
 }
