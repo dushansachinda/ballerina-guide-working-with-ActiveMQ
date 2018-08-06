@@ -35,7 +35,7 @@ function testResourceOrderDelivey() {
     test:assertEquals(response.statusCode, 200, msg = "service did not respond with 200 OK signal!");
     // Check whether the response is as expected
     json resPayload = check response.getJsonPayload();
-    json expected = { "Message": "Your order is successfully placed' };
+    json expected = { "Message": "Your order is successfully placed"};
     test:assertEquals(resPayload, expected, msg = "Response mismatch!");
 
 }
