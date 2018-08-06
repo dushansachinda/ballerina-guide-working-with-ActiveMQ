@@ -42,13 +42,15 @@ ballerina-guide-working-with-ActiveMQ
       │    ├── order_accepting_service.bal
       │    └── tests
       │         └── order_accepting_service_test.bal
+      │ 
       │── order_dispatcher_service
       │    └── order_dispatcher_service.bal
-      │
-      └── order_process_service
-	   ├── retail_order_process_service.bal
+      │   	
+      └── retail_order_process_service
+      │    └── retail_order_process_service.bal
+      │ 
+      └── retail_order_process_service
 	   └── wholesale_order_process_service.bal	
-
 ```
      
 - Create the above directories in your local machine and also create empty .bal files.
@@ -353,7 +355,7 @@ Once you are done with the development, you can deploy the services using any of
 
 **Deploying locally**
 
-As the first step, you can build Ballerina executable archives (.balx) of the services that we developed above. Navigate to each directory in ballerina-guide-working-with-ActiveMQ/guide and run the following command.
+As the first step, you can build Ballerina executable archives (.balx) of the services that we developed above. Navigate to  ballerina-guide-working-with-ActiveMQ/guide and run the following command.
 ```
    $ ballerina build
 ```
@@ -369,4 +371,116 @@ ballerina: initiating service(s) in 'retail_order_process_service.balx'
 ballerina: initiating service(s) in 'wholesale_order_process_service.balx'
 ```
 
+**Deploying on Docker**
 
+You can run the service that we developed above as a docker container. As Ballerina platform includes Ballerina_Docker_Extension, which offers native support for running ballerina programs on containers, you just need to put the corresponding docker annotations on your service code. Since this guide requires ActiveMQ as a prerequisite, you need a couple of more steps to configure it in docker container.
+
+Please follow bleow steps.
+
+- pull the ActiveMQ 5.12.0 docker image.
+```
+docker pull consol/activemq-5.12
+```
+
+- Launch the docker image
+```
+docker run -d --name='activemq' -it --rm -P consol/activemq-5.12:latest
+```
+- then execte ``` docker ps ``` command and check ActiveMQ container is up and ruuning.
+```
+f80fa55fe8c9        consol/activemq-5.12:latest   "/bin/sh -c '/opt/ap…"   8 hours ago         Up 8 hours          0.0.0.0:32779->1883/tcp, 0.0.0.0:32778->5672/tcp, 0.0.0.0:32777->8161/tcp, 0.0.0.0:32776->61613/tcp, 0.0.0.0:32775->61614/tcp, 0.0.0.0:32774->61616/tcp   activemq
+```
+Now let's see how we can deploy the order_acepting_service we developed above on docker. We need to import ballerinax/docker and use the annotation @docker:Config as shown below to enable docker image generation during the build time.
+
+
+**order_acepting_service**
+
+```
+import ballerina/log;
+import ballerina/http;
+import ballerina/jms;
+import ballerinax/docker;   
+
+
+
+
+// Type definition for a order
+type Order record {
+    string customerID;
+    string productID;
+    string quantity;
+    string orderType;
+};
+
+
+// Initialize a JMS connection with the provider
+// 'providerUrl' and 'initialContextFactory' vary based on the JMS provider you use
+// 'Apache ActiveMQ' has been used as the message broker in this example
+jms:Connection jmsConnection = new({
+        initialContextFactory: "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+        providerUrl: "tcp://172.17.0.2:61616" 
+    });
+
+// Initialize a JMS session on top of the created connection
+jms:Session jmsSession = new(jmsConnection, {
+        acknowledgementMode: "AUTO_ACKNOWLEDGE"
+    });
+
+// Initialize a queue sender using the created session
+endpoint jms:QueueSender jmsProducer {
+    session:jmsSession,
+    queueName:"Order_Queue"
+};
+
+
+@docker:Config {
+    registry:"ballerina.guides.io",
+    name:"order_accepting_service.bal",
+    tag:"v1.0"
+}
+
+@docker:CopyFiles {
+   files:[{source:"/home/krishan/Servers/apache-activemq-5.12.0/lib/geronimo-j2ee-management_1.1_spec-1.0.1.jar",
+           target:"/ballerina/runtime/bre/lib"},{source:"/home/krishan/Servers/apache-activemq-5.12.0/lib/activemq-client-5.12.0.jar",
+          target:"/ballerina/runtime/bre/lib"}] }
+
+
+@docker:Expose{}
+endpoint http:Listener listener {
+    port:9090
+};
+
+// Order Accepting Service, which allows users to place order online
+@http:ServiceConfig {basePath:"/placeOrder"}
+service<http:Service> orderAcceptingService bind listener {
+    // Resource that allows users to place an order 
+    @http:ResourceConfig { methods: ["POST"], consumes: ["application/json"],
+        produces: ["application/json"] }
+    place(endpoint caller, http:Request request) {
+        http:Response response;
+        Order newOrder;
+```
+- You may configure other services the same way as above i.e order_dispatcher_service.bal, wholesale_order_process_service.bal, retail_order_process_service.bal what you may need to change @docker:Config names to the respective services
+
+- @docker:Config annotation is used to provide the basic docker image configurations for the sample. @docker:CopyFiles is used to copy the JMS broker jar files into the ballerina bre/lib folder. You can provide multiple files as an array to field files of CopyFiles docker annotation. @docker:Expose {} is used to expose the port.
+
+- Now you can build a Ballerina executable archive (.balx) of the service that we developed above, using the following command. This will also create the corresponding docker image using the docker annotations that you have configured above. Navigate to ballerina-guide-working-with-ActiveMQ/guide and run the following command.
+
+```
+ballerina build
+
+```
+Then run below commands to start docker containers
+```
+docker run -d -p 9090:9090 ballerina.guides.io/order_accepting_service.bal:v1.0
+docker run -d  ballerina.guides.io/order_dispatcher_service.bal:v1.0
+docker run -d  ballerina.guides.io/wholesale_order_process_service.bal:v1.0
+docker run -d  ballerina.guides.io/retail_order_process_service.bal:v1.0
+```
+
+- Verify docker container is running with the use of $ docker ps. The status of the docker container should be shown as 'Up'.
+
+- You can access the service using the same curl commands that we've used above.
+```
+curl -d '{"customerID":"C001","productID":"P001","quantity":"4","orderType":"retail"}' -H "Content-Type: application/json" -X POST http://localhost:9090/placeOrder/place
+```
