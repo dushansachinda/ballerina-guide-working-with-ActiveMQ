@@ -25,6 +25,7 @@ Let's consider a real world secenario where online order management system. Clie
 **Note -**
 After installing the JMS broker, copy its .jar files into the <BALLERINA_HOME>/bre/lib folder
 For ActiveMQ 5.12.0: Copy activemq-client-5.12.0.jar, geronimo-j2ee-management_1.1_spec-1.0.1.jar and hawtbuf-1.11.jar
+
 A Text Editor or an IDE
 
 
